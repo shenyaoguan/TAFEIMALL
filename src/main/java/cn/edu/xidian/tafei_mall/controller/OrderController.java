@@ -1,7 +1,10 @@
 package cn.edu.xidian.tafei_mall.controller;
 
 
+import cn.edu.xidian.tafei_mall.service.OrderItemService;
+import cn.edu.xidian.tafei_mall.service.OrderService;
 import io.swagger.annotations.ApiKeyAuthDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +15,13 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderItemService orderItemService;
+
     @GetMapping("/")
     public ResponseEntity<?> searchOrder() {
         return ResponseEntity.ok("");
@@ -27,7 +37,7 @@ public class OrderController {
 
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> cancelOrder(@PathVariable String orderId) {
-
+        orderService.cancelOrder(orderId);
         return ResponseEntity.noContent().build();
     }
 }
