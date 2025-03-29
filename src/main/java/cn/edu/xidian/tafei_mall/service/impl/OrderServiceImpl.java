@@ -32,12 +32,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         * 和数据库中订单表的状态保持一致
         *
         * */
-        if (!"PENDING".equals(order.getStatus()) && !"PAID".equals(order.getStatus())) {
+        if (!"pending".equals(order.getStatus()) && !"paid".equals(order.getStatus())) {
             throw new RuntimeException("Order cannot be canceled");
         }
 
         // 更新订单状态为 "CANCELED"
-        order.setStatus("CANCELED");
+        order.setStatus("canceled");
         order.setUpdatedAt(LocalDateTime.now());
 
         // 保存修改
