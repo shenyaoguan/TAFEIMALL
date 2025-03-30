@@ -60,4 +60,10 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         }
         return new getOrderItemResponse(orderItemResponses);
     }
+    @Override
+    public boolean deleteOrderItemById(String orderItemId) {
+        int rowsAffected = orderItemMapper.deleteById(orderItemId);
+        return rowsAffected > 0;
+    }
+    
 }
