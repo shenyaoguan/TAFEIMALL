@@ -3,6 +3,7 @@ package cn.edu.xidian.tafei_mall.mapper;
 import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -14,5 +15,7 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface OrderItemMapper extends BaseMapper<OrderItem> {
+
+    public Integer getSalesVolume(@Param("startDate") String startDate, @Param("endDate") String endDate);
 
 }

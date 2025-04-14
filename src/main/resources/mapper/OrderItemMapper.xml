@@ -17,5 +17,12 @@
     <sql id="Base_Column_List">
         order_item_id, order_id, product_id, quantity, price, created_at, updated_at
     </sql>
+    
+    <select id="getSalesVolume" resultType="integer" >
+        select sum(quantity)
+        from order_item oi join t_order o
+                            on oi.order_id = o.order_id
+        where o.created_at between #{startDate} and #{endDate}
+    </select>
 
 </mapper>

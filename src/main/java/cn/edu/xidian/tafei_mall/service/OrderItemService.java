@@ -3,6 +3,7 @@ package cn.edu.xidian.tafei_mall.service;
 import cn.edu.xidian.tafei_mall.model.entity.OrderItem;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderItemResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface OrderItemService extends IService<OrderItem> {
     String addOrderItem(OrderItem orderItem);
     // 卖家
     getOrderItemResponse getOrderItemBySeller(String userId);
+
+    Integer getSalesVolume(String startDate, String endDate);
 }

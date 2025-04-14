@@ -20,4 +20,13 @@
         product_id, name, description, price, stock, is_free_shipping, seller_id, created_at, updated_at
     </sql>
 
+    <select id="getTopProduct" resultType="cn.edu.xidian.tafei_mall.model.vo.TopProductVO">
+        select p.product_id, p.name, sum(oi.quantity)  as salesCount
+            from product p join order_item oi
+                            on p.product_id = oi.product_id
+        group by p.product_id, p.name
+        order by salesCount desc
+        limit 1
+    </select>
+
 </mapper>

@@ -65,4 +65,11 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         }
         return new getOrderItemResponse(orderItemResponses);
     }
+
+    @Override
+    public Integer getSalesVolume(String startDate, String endDate) {
+        return orderItemMapper.getSalesVolume(startDate, endDate);
+    }
+
+
 }

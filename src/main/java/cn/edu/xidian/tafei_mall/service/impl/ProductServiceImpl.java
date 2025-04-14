@@ -2,8 +2,10 @@ package cn.edu.xidian.tafei_mall.service.impl;
 
 import cn.edu.xidian.tafei_mall.model.entity.Product;
 import cn.edu.xidian.tafei_mall.mapper.ProductMapper;
+import cn.edu.xidian.tafei_mall.model.vo.MonthlySalesVO;
 import cn.edu.xidian.tafei_mall.model.vo.ProductVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
+import cn.edu.xidian.tafei_mall.model.vo.TopProductVO;
 import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -148,5 +150,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     public getProductResponse getProduct(String userId) {
         List<Product> products = productMapper.selectList(new LambdaQueryWrapper<Product>().eq(Product::getSellerId, userId));
         return new getProductResponse(products);
+    }
+
+    @Override
+    public TopProductVO getTopProduct() {
+        return this.baseMapper.getTopProduct();
     }
 }
