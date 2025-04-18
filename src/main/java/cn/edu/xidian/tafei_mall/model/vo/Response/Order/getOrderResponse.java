@@ -7,7 +7,8 @@ import java.util.List;
 
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class getOrderResponse {
+public class
+getOrderResponse {
     private final List<OrderResponse> orders;
 
     public getOrderResponse(List<OrderResponse> orders) {

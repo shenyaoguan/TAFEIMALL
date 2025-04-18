@@ -1,3 +1,12 @@
+create table t_promotions
+(
+    promotion_id varchar(36)          not null
+        primary key,
+    start_date   timestamp            not null,
+    end_date     timestamp            not null,
+    is_active    tinyint(1) default 1 null
+);
+
 create table user
 (
     user_id    varchar(36)                        not null comment '用户ID'
@@ -58,6 +67,8 @@ create table product
     seller_id        varchar(36)                          not null comment '卖家ID',
     created_at       datetime   default CURRENT_TIMESTAMP not null comment '创建时间',
     updated_at       datetime   default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    current_price    decimal(10, 2)                       null,
+    is_on_promotion  tinyint(1) default 0                 null,
     constraint fk_product_seller
         foreign key (seller_id) references user (user_id)
 )
@@ -68,7 +79,8 @@ create table cart_item
     cart_item_id varchar(36)                        not null comment '购物车项ID'
         primary key,
     cart_id      varchar(36)                        not null comment '购物车ID',
-    product_id   varchar(36)                        not null comment '商品ID',
+    product_id   varchar(36)
+        not null comment '商品ID',
     quantity     int                                not null comment '数量',
     created_at   datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updated_at   datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
@@ -155,4 +167,47 @@ create index idx_order_id
 
 create index idx_user_id
     on t_order (user_id);
+
+create table t_product_reviews
+(
+    review_id  varchar(36)                         not null
+        primary key,
+    product_id varchar(36)                         null,
+    order_id   varchar(36)                         null,
+    rating     int                                 not null,
+    comment    text                                null,
+    created_at timestamp default CURRENT_TIMESTAMP null,
+    updated_at timestamp                           null,
+    constraint t_product_reviews_product_product_id_fk
+        foreign key (product_id) references product (product_id),
+    constraint t_product_reviews_t_order_order_id_fk
+        foreign key (order_id) references t_order (order_id),
+    check (`rating` between 1 and 5)
+);
+
+create table t_promotion_products
+(
+    promotion_id  varchar(36)   not null,
+    product_id    varchar(36)   not null,
+    discount_rate decimal(5, 2) not null,
+    primary key (promotion_id, product_id),
+    constraint t_promotion_products_product_product_id_fk
+        foreign key (product_id) references product (product_id),
+    constraint t_promotion_products_t_promotions_promotion_id_fk
+        foreign key (promotion_id) references t_promotions (promotion_id)
+);
+
+create table t_user_favorites
+(
+    favorite_id varchar(36)                        not null comment '收藏ID'
+        primary key,
+    user_id     varchar(36)                        not null comment '用户ID',
+    product_id  varchar(36)                        not null comment '商品ID',
+    created_at  datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at  datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint fk_favorite_user
+        foreign key (user_id) references user (user_id),
+    constraint fk_favorite_product
+        foreign key (product_id) references product (product_id)
+);
 

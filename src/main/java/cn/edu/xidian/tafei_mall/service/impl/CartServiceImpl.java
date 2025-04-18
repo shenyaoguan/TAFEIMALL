@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,8 +50,9 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements Ca
         for (CartItem cartItem : cartItems) {
             Product product = productService.getById(cartItem.getProductId());
             if (product != null) {
-                response.putItem(cartItem.getCartItemId() ,product.getProductId(), product.getName(), cartItem.getQuantity() ,product.getPrice().doubleValue());
-                totalPrice += product.getPrice().doubleValue() * cartItem.getQuantity();
+                BigDecimal current = productService.currentPrice(product.getProductId()); // 返回现价
+                response.putItem(cartItem.getCartItemId() ,product.getProductId(), product.getName(), cartItem.getQuantity() ,current.doubleValue());
+                totalPrice += current.doubleValue() * cartItem.getQuantity();
             }
         }
         response.setTotal(totalPrice);

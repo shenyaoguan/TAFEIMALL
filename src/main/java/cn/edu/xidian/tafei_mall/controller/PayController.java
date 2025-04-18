@@ -1,6 +1,7 @@
 package cn.edu.xidian.tafei_mall.controller;
 
 
+import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.service.PayService;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import cn.hutool.json.JSONUtil;
@@ -36,11 +37,12 @@ public class PayController {
         if (sessionId == null) {
             return ResponseEntity.status(401).body("未登录");
         }
-        if (userService.getUserInfo(sessionId) == null) {
+        User user = userService.getUserInfo(sessionId);
+        if (user == null) {
             return ResponseEntity.status(401).body("用户不存在");
         }
         // 这里可以调用订单服务来创建订单
-        payService.createPayOrder(orderId);
+        payService.createPayOrder(orderId, user.getUserId());
         // 假设创建订单成功，返回201 Created
         return ResponseEntity.created(URI.create("")).build();
     }
