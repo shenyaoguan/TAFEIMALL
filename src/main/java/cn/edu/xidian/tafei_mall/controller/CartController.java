@@ -26,7 +26,7 @@ import java.net.URI;
  */
 
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/api/v1/cart")
 public class CartController {
     @Autowired
     private CartService cartService;

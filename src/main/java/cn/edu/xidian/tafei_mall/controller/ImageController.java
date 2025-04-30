@@ -31,7 +31,7 @@ import java.net.URI;
 
 
 @RestController
-@RequestMapping("/api/image")
+@RequestMapping("/api/v1/image")
 public class ImageController {
     @Autowired
     private ProductService productService;

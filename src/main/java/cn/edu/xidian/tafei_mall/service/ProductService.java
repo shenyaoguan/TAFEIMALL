@@ -5,6 +5,7 @@ import cn.edu.xidian.tafei_mall.model.vo.ProductVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 /**
@@ -29,4 +30,7 @@ public interface ProductService extends IService<Product> {
     boolean deleteProduct(String productId, String userId);
 
     getProductResponse getProduct(String userId);
+
+    // Server层中，同层调用，不需要暴露给上层
+    BigDecimal currentPrice(String productId);
 }

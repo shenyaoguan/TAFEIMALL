@@ -5,16 +5,17 @@ import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Promotion.createPromotionResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Report.createReportResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.addProductResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
-import cn.edu.xidian.tafei_mall.service.OrderItemService;
-import cn.edu.xidian.tafei_mall.service.ProductService;
-import cn.edu.xidian.tafei_mall.service.UserService;
+import cn.edu.xidian.tafei_mall.service.*;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import cn.edu.xidian.tafei_mall.service.OrderService;
+
 import java.net.URI;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ import java.util.Map;
  */
 
 @RestController
-@RequestMapping("/api/seller")
+@RequestMapping("/api/v1/seller")
 @SessionAttributes(value = "sellerid")
 public class SellerController {
 
@@ -45,7 +46,10 @@ public class SellerController {
     private OrderService orderService;
 
     @Autowired
-    private OrderItemService orderItemService;
+    private ReportService reportService;
+
+    @Autowired
+    private PromotionService promotionService;
 
     @PostMapping("/products")
     public ResponseEntity<?> addProduct(@RequestBody ProductVO productVO, @RequestHeader("Session-Id") String sessionId) {
@@ -126,7 +130,9 @@ public class SellerController {
     }
 
     @PutMapping("/orders/{orderId}")
-    public ResponseEntity<?> updateOrder(@RequestHeader("Session-Id") String sessionId, @PathVariable String orderId, @RequestBody OrderUpdateVO orderUpdateVO) {
+    public ResponseEntity<?> updateOrder(@RequestHeader("Session-Id") String sessionId,
+                                         @PathVariable String orderId,
+                                         @RequestBody OrderUpdateVO orderUpdateVO) {
         try{
             if (sessionId == null) {
                 return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
@@ -141,4 +147,44 @@ public class SellerController {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/reports/monthly")
+    public ResponseEntity<?> getMonthlyReports(@RequestHeader("Session-Id") String sessionId,
+                                               @RequestParam int year,
+                                               @RequestParam int month,
+                                               @RequestParam(defaultValue = "false") boolean detail) {
+        try{
+            if (sessionId == null) {
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
+            }
+            User user = userService.getUserInfo(sessionId);
+            if (user == null) {
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
+            }
+            createReportResponse response = reportService.createMonthlyReport(year, month, detail, user.getUserId());
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/promotions")
+    public ResponseEntity<?> CreatePromotion(@RequestHeader("Session-Id") String sessionId,
+                                               @RequestBody PromotionCreateVO promotionCreateVO) {
+        try{
+            if (sessionId == null) {
+                return new ResponseEntity<>(new MessageResponse("未登录"), HttpStatus.UNAUTHORIZED);
+            }
+            User user = userService.getUserInfo(sessionId);
+            if (user == null) {
+                return new ResponseEntity<>(new MessageResponse("用户不存在"), HttpStatus.UNAUTHORIZED);
+            }
+            createPromotionResponse response = promotionService.createPromotion(promotionCreateVO, user.getUserId());
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 }

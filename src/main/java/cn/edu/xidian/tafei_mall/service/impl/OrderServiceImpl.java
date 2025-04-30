@@ -5,11 +5,7 @@ import cn.edu.xidian.tafei_mall.mapper.*;
 import cn.edu.xidian.tafei_mall.model.entity.*;
 import cn.edu.xidian.tafei_mall.model.vo.OrderCreateVO;
 import cn.edu.xidian.tafei_mall.model.vo.OrderUpdateVO;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Buyer.*;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderItemResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.OrderResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderItemResponse;
-import cn.edu.xidian.tafei_mall.model.vo.Response.Order.getOrderResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Order.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.updateOrderResponse;
 import cn.edu.xidian.tafei_mall.service.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -41,6 +37,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private ProductService productService;
     @Autowired
+    private ProductMapper productMapper;
+    @Autowired
     private CartMapper cartMapper;
     @Autowired
     private CartItemMapper cartItemMapper;
@@ -61,6 +59,79 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return orderMapper.selectById(orderId);
     }
 
+    @Override
+    public String updateOrderStatus(String orderId, String status){
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new RuntimeException("Order not found");
+        }
+        switch (status) {
+            case "paid":{
+                if (!order.getStatus().equals("pending")) {
+                    throw new IllegalArgumentException("Order cannot be paid");
+                }
+                Cart cart = cartMapper.selectOne(new QueryWrapper<Cart>().eq("user_id", order.getUserId()));
+                List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(orderId);
+                Map<CartItem, Product> products = new HashMap<>();
+                // 验证购物车商品是否存在，库存是否足够
+                List<String> orderItemIds = new ArrayList<>();
+                boolean cartItemExists = true;
+                List<String> productIdsOfNotExist = new ArrayList<>();
+                boolean productExists = true;
+                List<String> productIdsOfNotEnough = new ArrayList<>();
+                boolean productStockEnough = true;
+                for (OrderItem orderItem : orderItems) {
+                    CartItem cartItem = cartItemMapper.selectOne(new QueryWrapper<CartItem>().eq("cart_id", cart.getCartId()).eq("product_id", orderItem.getProductId()));
+                    if (cartItem == null) {
+                        orderItemIds.add(orderItem.getOrderItemId());
+                        cartItemExists = false;
+                    }
+                    if (!cartItemExists) {
+                        continue;
+                    }
+                    Optional<Product> product = productService.getProductById(cartItem.getProductId());
+                    if (product.isEmpty()) {
+                        productIdsOfNotExist.add(orderItem.getProductId());
+                        productExists = false;
+                    }
+                    if (!productExists) {
+                        continue;
+                    }
+                    if (cartItem.getQuantity() > product.get().getStock()) {
+                        productIdsOfNotEnough.add(orderItem.getProductId());
+                        productStockEnough = false;
+                    }
+                    if (!productStockEnough) {
+                        continue;
+                    }
+                    products.put(cartItem, product.get());
+                }
+                if (!cartItemExists) {
+                    throw new IllegalArgumentException("Order item not found in cart: " + String.join(",", orderItemIds));
+                }
+                if (!productExists) {
+                    throw new IllegalArgumentException("Product not found: " + String.join(",", productIdsOfNotExist));
+                }
+                if (!productStockEnough) {
+                    throw new IllegalArgumentException("Product not enough: " + String.join(",", productIdsOfNotEnough));
+                }
+                // 清空购物车，商品库存减少
+                for (Map.Entry<CartItem, Product> entry : products.entrySet()) {
+                    Product product = entry.getValue();
+                    product.setStock(product.getStock() - entry.getKey().getQuantity());
+                    product.setUpdatedAt(LocalDateTime.now());
+                    productMapper.updateById(product);
+                    cartItemMapper.deleteById(entry.getKey().getCartItemId());
+                }
+                break;
+            }
+            default: throw new IllegalArgumentException("Order status error");
+        }
+        order.setStatus(status);
+        orderMapper.updateById(order);
+        return order.getStatus();
+    }
+
     /*----------------------买家视角----------------------*/
 
     /**
@@ -72,7 +143,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public getOrderResponse getOrderByCustomer(String userId){
 //        List <Order> orders = orderMapper.findByUserId(userId);
         List<Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("user_id", userId));
-        return new getOrderResponse(OrderListGenerator(orders));
+        return new getOrderResponse(OrderListGenerator(orders, false));
     }
 
     /**
@@ -132,7 +203,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             OrderItem orderItem = new OrderItem();
             orderItem.setProductId(cartItem.getProductId());
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(product.get().getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+            orderItem.setPrice(productService.currentPrice(product.get().getProductId()).multiply(BigDecimal.valueOf(cartItem.getQuantity())));
             orderItemListMap.get(sellerId).add(orderItem);
         }
         // 获取地址
@@ -181,6 +252,32 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
+     * 确认收货
+     * @param orderId 订单ID
+     * @param userId 用户ID
+     * @return 是否成功
+     */
+    @Override
+    public boolean confirmOrder(String orderId, String userId) {
+        // 验证订单状态是否可以确认收货
+        Order order = getOrderById(orderId);
+        if (order == null) {
+            throw new RuntimeException("Order not found");
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Order does not belong to current user");
+        }
+        if (!order.getStatus().equals("shipping")) {
+            throw new IllegalArgumentException("Order cannot be confirmed");
+        }
+        // 更改订单状态为已完成
+        order.setStatus("finished");
+        // 提交
+        orderMapper.updateById(order);
+        return true;
+    }
+
+    /**
      * 取消订单
      * @param orderId 订单ID
      * @return 是否成功
@@ -215,7 +312,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public getOrderResponse getOrderBySeller(String userId) {
         List<Order> orders = orderMapper.selectList(new QueryWrapper<Order>().eq("seller_id", userId));
-        return new getOrderResponse(OrderListGenerator(orders));
+        return new getOrderResponse(OrderListGenerator(orders, true));
     }
 
     /**
@@ -232,6 +329,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         if (!order.getSellerId().equals(userId)) {
             throw new IllegalArgumentException("Order does not belong to current seller");
+        }
+        if (order.getStatus().equals("pending")) {
+            throw new IllegalArgumentException("Unpaid order is not visible");
         }
         // 获取订单项
         List<OrderResponse> orderResponse = new ArrayList<>();
@@ -253,14 +353,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (order == null) {
             throw new RuntimeException("Order not found");
         }
-       if (!order.getSellerId().equals(userId)) {
+        if (!order.getSellerId().equals(userId)) {
             throw new IllegalArgumentException("Order does not belong to current seller");
         }
         // 更新订单状态
         switch (orderUpdateVO.getAction()) {
-            case "shipping": { // to 'shipping'
+            case "shipping": {
                 if (!order.getStatus().equals("paid")) {
-                    throw new IllegalArgumentException("Order cannot be shipping");
+                    throw new IllegalArgumentException("Order must be paid");
                 }
                 order.setStatus("shipping");
                 // order.setTrackingNumber(orderUpdateVO.getTrackingNumber());
@@ -273,7 +373,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 }
 
             }
-            case "canceled": { // to 'canceled'
+            case "canceled": {
                 if (!order.getStatus().equals("pending") && !order.getStatus().equals("paid")) {
                     throw new IllegalArgumentException("Order cannot be cancelled");
                 }
@@ -299,13 +399,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 订单ID
      */
     @Contract("_ -> new")
-    private @Nullable List<OrderResponse> OrderListGenerator(@Nullable List <Order> orders) {
+    private @Nullable List<OrderResponse> OrderListGenerator(@Nullable List <Order> orders, @NonNull boolean isSeller) {
         if (orders == null || orders.isEmpty()) {
             return null;
         }
-        // 获取订单项
+        // 获取订单
         List<OrderResponse> orderResponses = new ArrayList<>();
         for (Order order : orders) {
+            if (isSeller && order.getStatus().equals("pending")) {
+                continue; // 卖家不显示待付款订单
+            }
             orderResponses.add(OrderDetailGenerator(order));
         }
         return orderResponses;
@@ -337,31 +440,5 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         // 生成订单详情
         return new OrderResponse(order.getOrderId(), order.getStatus(), userName, sellerName, new getOrderItemResponse(orderItemResponses));
-    }
-
-    /**
-     * 确认收货
-     * @param orderId 订单ID
-     * @return 是否成功
-     */
-
-    @Override
-    public boolean confirmOrder(String orderId, String userId) {
-        // 验证订单状态是否可以确认收货
-        Order order = getOrderById(orderId);
-        if (order == null) {
-            throw new RuntimeException("Order not found");
-        }
-        if (!order.getUserId().equals(userId)) {
-            throw new IllegalArgumentException("Order does not belong to current user");
-        }
-        if (!order.getStatus().equals("shipping")) {
-            throw new IllegalArgumentException("Order cannot be confirmed");
-        }
-        // 更改订单状态为已完成
-        order.setStatus("finished");
-        // 提交
-        orderMapper.updateById(order);
-        return true;
     }
 }

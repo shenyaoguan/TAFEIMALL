@@ -1,4 +1,4 @@
-package cn.edu.xidian.tafei_mall.model.vo.Response.Buyer;
+package cn.edu.xidian.tafei_mall.model.vo.Response.Order;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
