@@ -1,4 +1,4 @@
-package cn.edu.xidian.tafei_mall.controller;
+package cn.edu.xidian.tafei_mall.controller.v1;
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
 import cn.edu.xidian.tafei_mall.model.vo.*;
@@ -26,7 +26,7 @@ import java.net.URI;
  */
 
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/api/v1/cart")
 public class CartController {
     @Autowired
     private CartService cartService;

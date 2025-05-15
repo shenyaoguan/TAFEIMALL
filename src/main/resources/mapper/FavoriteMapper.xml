@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.xidian.tafei_mall.mapper.FavoriteMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.edu.xidian.tafei_mall.model.entity.Favorite">
+        <id column="favorite_id" property="favoriteId" />
+        <result column="user_id" property="userId" />
+        <result column="product_id" property="productId" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        favorite_id, user_id, product_id, created_at, updated_at
+    </sql>
+
+</mapper> 

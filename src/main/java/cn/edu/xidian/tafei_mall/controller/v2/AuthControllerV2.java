@@ -1,10 +1,11 @@
-package cn.edu.xidian.tafei_mall.controller;
+package cn.edu.xidian.tafei_mall.controller.v2;
 
+import cn.edu.xidian.tafei_mall.model.entity.User;
+import cn.edu.xidian.tafei_mall.model.vo.LoginRequestVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Auth.LoginResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Auth.LogoutResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Auth.RegisterResponse;
-import cn.edu.xidian.tafei_mall.model.entity.User;
-import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.model.vo.UserRegistrationVO;
 import cn.edu.xidian.tafei_mall.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,8 +25,8 @@ import org.springframework.web.bind.annotation.*;
 */
 
 @RestController
-@RequestMapping("/api/auth")
-public class AuthController {
+@RequestMapping("/api/v2/auth")
+public class AuthControllerV2 {
     @Autowired
     private UserService userService;
 

@@ -58,6 +58,10 @@ public class Order implements Serializable {
     @TableField("status")
     private String status;
 
+    @ApiModelProperty("物流单号")
+    @TableField("tracking_number")
+    private String trackingNumber;
+
     @ApiModelProperty("创建时间")
     @TableField("created_at")
     private LocalDateTime createdAt;

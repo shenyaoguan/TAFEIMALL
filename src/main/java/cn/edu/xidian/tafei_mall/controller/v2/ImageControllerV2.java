@@ -1,4 +1,4 @@
-package cn.edu.xidian.tafei_mall.controller;
+package cn.edu.xidian.tafei_mall.controller.v2;
 
 import cn.edu.xidian.tafei_mall.model.vo.ImageVO;
 import cn.edu.xidian.tafei_mall.service.ImageService;
@@ -31,8 +31,8 @@ import java.net.URI;
 
 
 @RestController
-@RequestMapping("/api/image")
-public class ImageController {
+@RequestMapping("/api/v2/image")
+public class ImageControllerV2 {
     @Autowired
     private ProductService productService;
 

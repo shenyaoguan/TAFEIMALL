@@ -11,13 +11,14 @@
         <result column="payment_method" property="paymentMethod" />
         <result column="shipping_address_id" property="shippingAddressId" />
         <result column="status" property="status" />
+        <result column="tracking_number" property="trackingNumber" />
         <result column="created_at" property="createdAt" />
         <result column="updated_at" property="updatedAt" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        order_id, user_id, seller_id, total_amount, payment_method, shipping_address_id, status, created_at, updated_at
+        order_id, user_id, seller_id, total_amount, payment_method, shipping_address_id, status, tracking_number. created_at, updated_at
     </sql>
 
 </mapper>

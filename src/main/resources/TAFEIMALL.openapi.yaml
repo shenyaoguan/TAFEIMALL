@@ -9,6 +9,7 @@ tags:
   - name: 商品浏览与搜索
   - name: 购物车管理
   - name: 卖家功能
+  - name: 收藏管理
 paths:
   /api/auth/register:
     post:
@@ -468,6 +469,124 @@ paths:
                       - 已发货
           headers: {}
       security: []
+  /api/users/favorites:
+    post:
+      summary: 添加收藏
+      deprecated: false
+      description: ''
+      tags:
+        - 收藏管理
+      parameters:
+        - name: Session-Id
+          in: header
+          description: 会话ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+              required:
+                - productId
+      responses:
+        '200':
+          description: 收藏成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    examples:
+                      - 收藏成功
+    delete:
+      summary: 取消收藏
+      deprecated: false
+      description: ''
+      tags:
+        - 收藏管理
+      parameters:
+        - name: Session-Id
+          in: header
+          description: 会话ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+              required:
+                - productId
+      responses:
+        '204':
+          description: 取消收藏成功
+    get:
+      summary: 获取收藏列表
+      deprecated: false
+      description: ''
+      tags:
+        - 收藏管理
+      parameters:
+        - name: Session-Id
+          in: header
+          description: 会话ID
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 页码
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: 每页数量
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: 收藏总数
+                  favorites:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        productId:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        currentPrice:
+                          type: number
+                          format: float
+                        thumbnail:
+                          type: string
+                          format: url
 components:
   schemas:
     UserRegistration:
