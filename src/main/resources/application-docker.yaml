@@ -1,0 +1,34 @@
+#这个是使用 DOCKER 时的配置文件，编译 DOCKER 镜像时，请将其重命名为 application.yaml
+#注意，使用前请先备份原来的 application.yaml 文件，以防配置丢失
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/TAFEI_MALL?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: TAFEI_MALL
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: auto
+
+web:
+  web-url: ${WEB_URL:http://localhost:5173}
+  upload-path: /app/uploads/images
+
+api:
+  alipay:
+    app-id: ${ALIPAY_APP_ID:""}
+    app-private-key: ${ALIPAY_APP_PRIVATE_KEY:""}
+    alipay-public-key: ${ALIPAY_PUBLIC_KEY:""}
+    alipay-payee: ${ALIPAY_PAYEE:""}
+    gateway-url: ${ALIPAY_GATEWAY_URL:"https://openapi-sandbox.dl.alipaydev.com/gateway.do"}
+    notify-url: ${ALIPAY_NOTIFY_URL:""}
+    return-url: ${ALIPAY_RETURN_URL:""}
+    sign-type: ${ALIPAY_SIGN_TYPE:"RSA2"}
+    char-set: ${ALIPAY_CHAR_SET:"utf-8"}
+    timeout-express: ${ALIPAY_TIMEOUT_EXPRESS:"10m"}

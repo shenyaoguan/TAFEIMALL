@@ -1,0 +1,34 @@
+services:
+  app:
+    build: .
+    image: tafeimall-server:1.0.0
+    container_name: tafeimall-server
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://120.26.239.60:3306/TAFEI_MALL?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: YJR@7927szcq.COM
+      WEB_URL: http://localhost:5173
+
+      # 支付宝配置
+      ALIPAY_APP_ID: 2021000148675858
+      ALIPAY_APP_PRIVATE_KEY: "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCJqpPDmizBauX2dgOHh1lD1cVWX5rp49S/3F122MdVlW+P/k2qlbinQDxaVqRNrSJ7/zwMBGH5u9PW945E9UzdbxxX/EnT8RS3bQO6tNkPS3WBCcqgxB7yM+AuykSsWtYFOhQg3T60QLnbL0bydMkGsxz/14GyyVp4LhWLy2D7UoWWw3zGZW8v+cILziW5rr0mg7m2jdFjkcHEg5oc/bxaKt51rAvaGPmSOn24DxmXsPbXmrePuXS9jBPZ6fAdX6KV6yGHVisY6IRekzJSjDPb4x8GzYWsbuT+uDNuOoc7H39pMoncEXnq524MYXP8gJBHH4aES1DRRNsIbRpRpeOZAgMBAAECggEAVu00nKAvfnondvaRx/Q481J6Zs27ndBUuElHYxIC3BGd/khPdlVP4Zv3//sRiFK4oZ9KpTPnQa/OVcC/Pt+9h1zvgsc1PvTNZf0aC7zCCpxVOAOcxOLRv5HuDt19e29oEKjZqN7LBzqPoM07eUEw5mAXAZ1ssh3eWGCRDlJ/jHFhs56pwEoKDgCYXeHI7lKbWC1ksdpWPzHgSzxML0GwOQEDazC+zgkZOQN6RZzqLryCwppzALp2MQlGqDMPJ/v2NFDuNB3Q/caVf/TwlZIffvvTAJLyFs0RMl77hcK+QD422vL0D80npPN7rosyaVd0yCfpP8qQ6F4fPjogwEf1uQKBgQDXxEUYWALFfTAobJ2YHr59QHuvTaa/8wv7mBnztbHYIH6hBe1QhPao0uJ0j3OQHT7XqLr1pyNuo4wQuj7BzFAtyG6YLxZ/YPczngARQOJW8x7+9S6fInPisz+V2Vter1Z4ZXgQyxVx3i5DHiWrXyBnAYu3AzcpLTUn+TgsjOBmhwKBgQCjViXFkwvnkrnr+5lhbBlUFe7rRdUdbnF2KnRE7FB1zv09hZgK+2i4PjHx9zvcjLQO4a/N0OVc+OHQEMYesjCwDZGz4yrXSOOyoMMhmQ0+rrfp5kFcMOD2/WMTXQhoh9kRWc4mv0slEzMVKsqn3IBHj+hBuq+12E3ch6tqGP/M3wKBgHYSQllC+ClIC01juo2e7VCvM7/Hd2N8xebk4fa6S9rgVUsaajXwvOW/mQp94ZhQWK48+CorTzlhJ+mTcXotqwaSsup2ghIsZroJUTIf1nwMSL7uPpf4i3/X5QjES7qxqljx9dUCvPZ1xc0WtzhjMuELOIBqswnGYltAhtviL34LAoGARWcKf6wep9RBqdLrdmjfTkpPjarLhkjybxpU8yBSg+xi0GxekXQIKBlNUZoS1oD21UfyUorLmriqAqXN+ScP5w6s9Xm2L2nqTnFe2HzXEuZcgUd0SD8AqBI8sfKa6wemJWg6X15zCJri3sCjAbaAz2eHcb5ogOUbGHSRUnCy6JMCgYA9ICoLF1MS88OSAmvCP6LYJTZkLr3U2hW3MNXX6FPlpbik8ZkdsLU9Lb1xGklB4J7gW9GXqLrptRXX1DGcrvXO9U/cvPJVk5rhapdXt95dUFLZZEcNp3i0TmhTvF7baZG5XSs0sHLmRaL3G+iMJkk2CoH2lSoTbecIdIfNo66BZQ=="
+      ALIPAY_PUBLIC_KEY: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAl4pdSXeiOfERuf2QiP2eK6XMxWm7lwReKuM6Nl5n81Mi6/mwyfC/ArmWRRSUYe5vvH78Wl43rJ7q/jsew+L1BzWKgZ+UfjYkqgSvIDoUiwFQec5zzDFhER4PwnmkYAXqmgKMj9Z4mPqUaGok4rDjWUpaufXML6aSSMj+BIlKoiaC90ywzx31WH0yU3fmduedVNeAPkE55FqORkJvhp8eCRC6G9c6bGRqjE3zc+QYsYkOzXKLXcX5nA8JNoMVApAT3zvi2IzJQ5f4e31q6Uxz6V+SvuEpXR6Ehxc3k7ivvWXPfTzAAsKJFw1ceZ12VKbY7apC0PrSYcyM2TNSKfQxIwIDAQAB"
+      ALIPAY_PAYEE: 2088721067675973
+      ALIPAY_GATEWAY_URL: "https://openapi-sandbox.dl.alipaydev.com/gateway.do"
+      ALIPAY_NOTIFY_URL: "http://test.szcq.top/api/v2/payment/notify"
+      ALIPAY_RETURN_URL: "http://test.szcq.top/api/v2/payment/return"
+      ALIPAY_SIGN_TYPE: "RSA2"
+      ALIPAY_CHAR_SET: "utf-8"
+      ALIPAY_TIMEOUT_EXPRESS: "10m"
+
+    volumes:
+      - /mydata/docker/tafeo-mall:/app/uploads
+
+    networks:
+      - 1panel-network
+
+networks:
+  1panel-network:
+    external: true

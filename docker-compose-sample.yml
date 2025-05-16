@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: tafeimall-server:1.0.0
+    container_name: tafeimall-server
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/TAFEIMALL?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: tafeimall
+      SPRING_DATASOURCE_PASSWORD: secure_password
+      WEB_URL: http://localhost:5173
+
+      # 支付宝配置
+      ALIPAY_APP_ID: your_app_id
+      ALIPAY_APP_PRIVATE_KEY: your_private_key
+      ALIPAY_PUBLIC_KEY: your_public_key
+      ALIPAY_PAYEE: your_payee_account
+      ALIPAY_GATEWAY_URL: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+      ALIPAY_NOTIFY_URL: https://your-domain.com/notify
+      ALIPAY_RETURN_URL: https://your-domain.com/return
+      ALIPAY_SIGN_TYPE: RSA2
+      ALIPAY_CHAR_SET: utf-8
+      ALIPAY_TIMEOUT_EXPRESS: 10m
+
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - tafeimall-network
+
+  db:
+    image: mysql:8.0
+    container_name: tafeimall-mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: TAFEIMALL
+      MYSQL_USER: tafeimall
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./cmd/build_table.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - tafeimall-network
+
+volumes:
+  mysql-data:
+
+networks:
+  tafeimall-network:
+    driver: bridge
