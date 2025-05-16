@@ -66,6 +66,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new RuntimeException("Order not found");
         }
         switch (status) {
+            case "canceled": {
+                if (!order.getStatus().equals("pending") && !order.getStatus().equals("paid")) {
+                    throw new IllegalArgumentException("Order cannot be cancelled");
+                }
+                order.setStatus("cancelled");
+                break;
+            }
             case "paid":{
                 if (!order.getStatus().equals("pending")) {
                     throw new IllegalArgumentException("Order cannot be paid");
@@ -356,6 +363,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (!order.getSellerId().equals(userId)) {
             throw new IllegalArgumentException("Order does not belong to current seller");
         }
+//        if(orderUpdateVO.getTrackingNumber() == null){
+//            throw new IllegalArgumentException("Tracking number cannot be null");
+//        }
         // 更新订单状态
         switch (orderUpdateVO.getAction()) {
             case "shipping": {
@@ -363,7 +373,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     throw new IllegalArgumentException("Order must be paid");
                 }
                 order.setStatus("shipping");
-                // order.setTrackingNumber(orderUpdateVO.getTrackingNumber());
+                order.setTrackingNumber(orderUpdateVO.getTrackingNumber());
                 order.setUpdatedAt(LocalDateTime.now());
                 orderMapper.updateById(order);
                 if (Objects.equals(order.getStatus(), "shipping")) {
@@ -426,6 +436,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 获取买家和卖家信息
         String userName = userMapper.selectById(order.getUserId()).getUsername();
         String sellerName = userMapper.selectById(order.getSellerId()).getUsername();
+        Address address = addressMapper.selectById(order.getShippingAddressId());
         // 获取订单项
         List<OrderItem> orderItems = orderItemService.getOrderItemByOrderId(order.getOrderId());
         if (orderItems.isEmpty()) {
@@ -439,6 +450,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderItemResponses.add(new OrderItemResponse(orderItem.getOrderItemId(), orderItem.getProductId(), product.get().getName(), orderItem.getQuantity(), orderItem.getPrice()));
         }
         // 生成订单详情
-        return new OrderResponse(order.getOrderId(), order.getStatus(), userName, sellerName, new getOrderItemResponse(orderItemResponses));
+        return new OrderResponse(order.getOrderId(), order.getStatus(), userName, sellerName, address.getCity(), address.getAddress(), address.getPostalCode(), order.getTrackingNumber(), new getOrderItemResponse(orderItemResponses));
     }
 }

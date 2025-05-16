@@ -1,13 +1,12 @@
-package cn.edu.xidian.tafei_mall.controller;
+package cn.edu.xidian.tafei_mall.controller.v2;
 
-import cn.edu.xidian.tafei_mall.model.entity.Product;
-import cn.edu.xidian.tafei_mall.model.entity.Review;
 import cn.edu.xidian.tafei_mall.model.entity.User;
-import cn.edu.xidian.tafei_mall.model.vo.*;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Order.MessageResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Product.getProductDetailResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Promotion.getPromotionResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Review.createReviewResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Review.getReviewResponse;
+import cn.edu.xidian.tafei_mall.model.vo.ReviewCreateVO;
 import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.edu.xidian.tafei_mall.service.PromotionService;
 import cn.edu.xidian.tafei_mall.service.ReviewService;
@@ -18,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 
 /**
@@ -33,8 +31,8 @@ import java.util.Optional;
  */
 
 @RestController
-@RequestMapping("/api/products")
-public class ProductController {
+@RequestMapping("/api/v2/products")
+public class ProductControllerV2 {
     @Autowired
     private ProductService productService;
     @Autowired
@@ -66,9 +64,12 @@ public class ProductController {
      */
     @GetMapping("/{productId}")
     public ResponseEntity<?> getProductDetails(@PathVariable String productId) {
-        Optional<Product> product = productService.getProductById(productId);
-        return product.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        try {
+            getProductDetailResponse response = productService.getProductDetail(productId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     /**

@@ -1,15 +1,10 @@
 package cn.edu.xidian.tafei_mall.service.impl;
 
-import cn.edu.xidian.tafei_mall.mapper.ImageMapper;
-import cn.edu.xidian.tafei_mall.mapper.PromotionMapper;
-import cn.edu.xidian.tafei_mall.mapper.PromotionProductMapper;
-import cn.edu.xidian.tafei_mall.model.entity.Image;
-import cn.edu.xidian.tafei_mall.model.entity.Product;
-import cn.edu.xidian.tafei_mall.mapper.ProductMapper;
-import cn.edu.xidian.tafei_mall.model.entity.Promotion;
-import cn.edu.xidian.tafei_mall.model.entity.PromotionProduct;
+import cn.edu.xidian.tafei_mall.mapper.*;
+import cn.edu.xidian.tafei_mall.model.entity.*;
 import cn.edu.xidian.tafei_mall.model.vo.ProductSimpleVO;
 import cn.edu.xidian.tafei_mall.model.vo.ProductVO;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Product.getProductDetailResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Seller.getProductResponse;
 import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.hutool.core.bean.BeanUtil;
@@ -54,61 +49,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Resource
     private PromotionMapper promotionMapper;
 
-  @Override
-  public Map<String, Object> searchProducts(String keyword, int page, int limit) {
-      if (page <= 0) page = 1;
-      if (limit <= 0) limit = 10;
+    @Resource
+    private UserMapper userMapper;
 
-      LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
-      if (keyword != null && !keyword.trim().isEmpty()) {
-          queryWrapper.like(Product::getName, keyword);
-      }
-
-      Page<Product> productPage = new Page<>(page, limit);
-      Page<Product> resultPage = productMapper.selectPage(productPage, queryWrapper);
-
-      List<Product> products = resultPage.getRecords();
-      long total;
-
-      if (keyword == null || keyword.trim().isEmpty()) {
-          total = productMapper.selectCount(new LambdaQueryWrapper<>());
-      } else {
-          LambdaQueryWrapper<Product> countQueryWrapper = new LambdaQueryWrapper<>();
-          countQueryWrapper.like(Product::getName, keyword);
-          total = productMapper.selectCount(countQueryWrapper);
-      }
-
-      // 转换为 VO 列表
-      List<ProductSimpleVO> productVOList = products.stream().map(product -> {
-          ProductSimpleVO vo = new ProductSimpleVO();
-          vo.setProductId(product.getProductId());
-          vo.setName(product.getName());
-          vo.setPrice(product.getPrice());
-
-          // 查询图片
-          List<String> imageUrls = imageMapper.selectList(
-                          new LambdaQueryWrapper<Image>()
-                                  .eq(Image::getProductId, product.getProductId())
-                  ).stream()
-                  .map(Image::getImagePath)
-                  .toList();
-
-          // 设置缩略图为第一张图片
-          if (!imageUrls.isEmpty()) {
-              vo.setThumbnail(imageUrls.get(0));
-          }
-
-          return vo;
-      }).collect(Collectors.toList());
-
-      // 构造响应
-      Map<String, Object> response = new HashMap<>();
-      response.put("total", total);
-      response.put("results", productVOList);
-      return response;
-  }
-
-
+    /*----------------------同层调用----------------------*/
 
     /**
      * 根据 ID 获取商品详情
@@ -135,6 +79,105 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         return Optional.ofNullable(product);
     }
 
+    @Override
+    public BigDecimal currentPrice(String productId) {
+        Product product = productMapper.selectById(productId);
+        if (product == null) {
+            return BigDecimal.ZERO;
+        }
+
+        List<PromotionProduct> promotionProducts = promotionProductMapper.selectList(new QueryWrapper<PromotionProduct>().eq("product_id", productId));
+        if (promotionProducts != null && !promotionProducts.isEmpty()) {
+            // 如果有促销活动，返回促销价格
+            for (PromotionProduct promotionProduct : promotionProducts) {
+                Promotion promotion = promotionMapper.selectById(promotionProduct.getPromotionId());
+                if (promotion != null) {
+                    // 促销活动有效
+                    if (promotion.getIsActive() && promotion.getStartDate().isBefore(LocalDateTime.now()) && promotion.getEndDate().isAfter(LocalDateTime.now())) {
+                        // 计算折扣价格
+                        return product.getPrice().multiply(BigDecimal.valueOf(100).subtract(promotionProduct.getDiscountRate()).multiply(BigDecimal.valueOf(0.01)));
+                    }
+                }
+            }
+        }
+
+        return product.getPrice();
+    }
+
+    /*----------------------通用视角----------------------*/
+
+    @Override
+    public Map<String, Object> searchProducts(String keyword, int page, int limit) {
+        if (page <= 0) page = 1;
+        if (limit <= 0) limit = 10;
+
+        LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            queryWrapper.like(Product::getName, keyword);
+        }
+
+        Page<Product> productPage = new Page<>(page, limit);
+        Page<Product> resultPage = productMapper.selectPage(productPage, queryWrapper);
+
+        List<Product> products = resultPage.getRecords();
+        long total;
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+                 total = productMapper.selectCount(new LambdaQueryWrapper<>());
+        } else {
+            LambdaQueryWrapper<Product> countQueryWrapper = new LambdaQueryWrapper<>();
+            countQueryWrapper.like(Product::getName, keyword);
+            total = productMapper.selectCount(countQueryWrapper);
+        }
+
+        // 转换为 VO 列表
+        List<ProductSimpleVO> productVOList = products.stream().map(product -> {
+            ProductSimpleVO vo = new ProductSimpleVO();
+            vo.setProductId(product.getProductId());
+            vo.setName(product.getName());
+            vo.setPrice(product.getPrice());
+
+            // 查询图片
+            List<String> imageUrls = imageMapper.selectList(
+                            new LambdaQueryWrapper<Image>()
+                                    .eq(Image::getProductId, product.getProductId())
+                    ).stream()
+                    .map(Image::getImagePath)
+                    .toList();
+
+            // 设置缩略图为第一张图片
+            if (!imageUrls.isEmpty()) {
+                vo.setThumbnail(imageUrls.get(0));
+            }
+
+            return vo;
+        }).collect(Collectors.toList());
+
+        // 构造响应
+        Map<String, Object> response = new HashMap<>();
+        response.put("total", total);
+        response.put("results", productVOList);
+        return response;
+    }
+
+    @Override
+    public getProductDetailResponse getProductDetail(String productId){
+        Product product = productMapper.selectById(productId);
+        if (product == null) {
+            return null;
+        }
+        User seller = userMapper.selectById(product.getSellerId());
+        if (seller == null) {
+            throw new RuntimeException("卖家不存在");
+        }
+        List<String> images = imageMapper.selectList(new LambdaQueryWrapper<Image>().eq(Image::getProductId, productId))
+                .stream()
+                .map(Image::getImagePath)
+                .toList();
+        return new getProductDetailResponse(product.getProductId(), product.getName(), product.getDescription(), product.getPrice(), product.getStock(), product.getIsFreeShipping(), seller.getUsername(), seller.getEmail(), images);
+    }
+
+    /*----------------------卖家视角----------------------*/
 
     /**
      * 添加商品
@@ -195,33 +238,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
      * @return 商品列表
      */
     @Override
-    public getProductResponse getProduct(String userId) {
+    public getProductResponse getProductListBySeller(String userId) {
         List<Product> products = productMapper.selectList(new LambdaQueryWrapper<Product>().eq(Product::getSellerId, userId));
         return new getProductResponse(products);
     }
 
-    @Override
-    public BigDecimal currentPrice(String productId) {
-        Product product = productMapper.selectById(productId);
-        if (product == null) {
-            return BigDecimal.ZERO;
-        }
-
-        List<PromotionProduct> promotionProducts = promotionProductMapper.selectList(new QueryWrapper<PromotionProduct>().eq("product_id", productId));
-        if (promotionProducts != null && !promotionProducts.isEmpty()) {
-            // 如果有促销活动，返回促销价格
-            for (PromotionProduct promotionProduct : promotionProducts) {
-                Promotion promotion = promotionMapper.selectById(promotionProduct.getPromotionId());
-                if (promotion != null) {
-                    // 促销活动有效
-                    if (promotion.getIsActive() && promotion.getStartDate().isBefore(LocalDateTime.now()) && promotion.getEndDate().isAfter(LocalDateTime.now())) {
-                        // 计算折扣价格
-                        return product.getPrice().multiply(BigDecimal.valueOf(100).subtract(promotionProduct.getDiscountRate()).multiply(BigDecimal.valueOf(0.01)));
-                    }
-                }
-            }
-        }
-
-        return product.getPrice();
-    }
 }

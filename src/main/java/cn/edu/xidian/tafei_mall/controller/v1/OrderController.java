@@ -1,4 +1,4 @@
-package cn.edu.xidian.tafei_mall.controller;
+package cn.edu.xidian.tafei_mall.controller.v1;
 
 
 import cn.edu.xidian.tafei_mall.model.entity.User;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @ApiKeyAuthDefinition(key = "Session-ID", in = ApiKeyAuthDefinition.ApiKeyLocation.HEADER, name = "Session-ID")
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/v1/orders")
 public class OrderController {
     @Autowired
     private OrderService orderService;

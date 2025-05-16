@@ -6,14 +6,12 @@ import cn.edu.xidian.tafei_mall.model.vo.Response.Report.DetailResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Report.SummaryResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Report.TopProductResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Report.createReportResponse;
-import cn.edu.xidian.tafei_mall.service.ProductService;
 import cn.edu.xidian.tafei_mall.service.ReportService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;

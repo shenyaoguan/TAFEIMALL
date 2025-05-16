@@ -1,7 +1,7 @@
-package cn.edu.xidian.tafei_mall.controller;
+package cn.edu.xidian.tafei_mall.controller.v2;
 
-import cn.edu.xidian.tafei_mall.model.entity.User;
-import cn.edu.xidian.tafei_mall.model.vo.*;
+import cn.edu.xidian.tafei_mall.model.vo.AddressUpdateVO;
+import cn.edu.xidian.tafei_mall.model.vo.FavoriteAddVO;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Address.AddressResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Address.getAddressResponse;
 import cn.edu.xidian.tafei_mall.model.vo.Response.Favorite.FavoriteResponse;
@@ -25,8 +25,8 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @RestController
-@RequestMapping("/api/users")
-public class UserController {
+@RequestMapping("/api/v2/users")
+public class UserControllerV2 {
     @Autowired
     private AddressService addressService;
     @Autowired(required = false)

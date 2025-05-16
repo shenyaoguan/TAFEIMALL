@@ -134,6 +134,7 @@ create table t_order
     payment_method      varchar(20)                           null comment '支付方式',
     shipping_address_id varchar(36)                           not null comment '收货地址ID',
     status              varchar(20) default 'pending'         not null comment '订单状态',
+    tracking_number      varchar(50)                           null comment '快递单号',
     created_at          datetime    default CURRENT_TIMESTAMP not null comment '创建时间',
     updated_at          datetime    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     constraint fk_order_address

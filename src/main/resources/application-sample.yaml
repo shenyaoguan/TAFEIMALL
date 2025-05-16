@@ -15,4 +15,18 @@ mybatis-plus:
         id-type: auto
 
 web:
-    upload-path: D:/Code/TAFEI_MALL/image
+  web-url: "http://localhost:5173"
+  upload-path: /Code/TAFEI_MALL/image
+
+api:
+  alipay:
+    app-id: "" # APPID
+    app-private-key: "" # 应用私钥
+    alipay-public-key: "" # 支付宝公钥
+    alipay-payee: "" # 收款支付宝账号
+    gateway-url: "https://openapi-sandbox.dl.alipaydev.com/gateway.do" # 支付宝网关
+    notify-url: "" # 服务器异步通知页面路径
+    return-url: "" # 页面跳转同步通知页面路径
+    sign-type: "RSA2" # 签名方式
+    char-set: "utf-8" # 字符编码格式
+    timeout-express: "10m" # 超时时间
