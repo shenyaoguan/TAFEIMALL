@@ -66,6 +66,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new RuntimeException("Order not found");
         }
         switch (status) {
+            case "canceled": {
+                if (!order.getStatus().equals("pending") && !order.getStatus().equals("paid")) {
+                    throw new IllegalArgumentException("Order cannot be cancelled");
+                }
+                order.setStatus("cancelled");
+                break;
+            }
             case "paid":{
                 if (!order.getStatus().equals("pending")) {
                     throw new IllegalArgumentException("Order cannot be paid");

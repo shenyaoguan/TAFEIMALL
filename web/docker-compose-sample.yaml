@@ -1,0 +1,11 @@
+services:
+  tafei-mall-web:
+    build:
+      context: .
+      args:
+        HTTP_BASE_URL: "http://api.tafei-mall.szcq.top"  # 默认API地址
+        HTTP_TIMEOUT: "5000"                             # 默认超时时间
+    container_name: tafei-mall-web
+    image: tafei-mall-web:1.0.0
+    ports:
+      - "5173:80"

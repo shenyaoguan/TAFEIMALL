@@ -2,7 +2,11 @@ package cn.edu.xidian.tafei_mall.service;
 
 
 import cn.edu.xidian.tafei_mall.model.entity.Image;
+import cn.edu.xidian.tafei_mall.model.vo.ImageVO;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Image.ImageUploadResponse;
+import cn.edu.xidian.tafei_mall.model.vo.Response.Image.LskyResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -19,8 +23,6 @@ import java.net.URI;
  */
 
 public interface ImageService extends IService<Image> {
-
-    URI uploadImage(String productId, MultipartFile file) throws IOException;
-
-    InputStream getImage(String imagePath);
+    ImageUploadResponse uploadToLsky(String productId, MultipartFile file) throws IOException, InterruptedException;
+    URI uploadToLocal(String productId, MultipartFile file) throws IOException;
 }

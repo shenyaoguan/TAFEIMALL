@@ -34,7 +34,7 @@ build/
 
 
 ### 个人配置 ###
-
-/src/main/resources/application.yaml
+docker-compose.yaml
+src/main/resources/application-backup.yaml
 src/main/resources/application.yaml
 image

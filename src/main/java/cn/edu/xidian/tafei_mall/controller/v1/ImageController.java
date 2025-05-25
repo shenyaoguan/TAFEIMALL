@@ -42,29 +42,6 @@ public class ImageController {
     @Autowired
     private ImageService imageService;
 
-    @GetMapping("")
-    public ResponseEntity<?> getImage(@RequestBody ImageVO imageVO, @RequestHeader("Session-Id") String sessionId) throws IOException {
-        // 检查是否登录
-        if (sessionId == null) {
-            return ResponseEntity.status(401).build();
-        }
-        // 检查用户是否存在
-        if (userService.getUserInfo(sessionId) == null) {
-            return ResponseEntity.status(401).build();
-        }
-        // 检查图像是否存在
-        InputStream image = imageService.getImage(imageVO.getImagePath());
-        if (image == null) {
-            return ResponseEntity.status(404).body("Image not found");
-        }
-        byte[] imageByte = StreamUtils.copyToByteArray(image);
-        // 这里可以添加处理图像请求的逻辑
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.IMAGE_PNG)
-                .body(imageByte);
-    }
-
     @PostMapping("{productId}")
     public ResponseEntity<?> createImage(@PathVariable("productId") String productId, @RequestParam("image") MultipartFile image,
                                          @RequestHeader("Session-Id") String sessionId) {
@@ -82,7 +59,7 @@ public class ImageController {
         }
         try {
             // 这里可以添加处理图像上传的逻辑
-            URI imagePath = imageService.uploadImage(productId, image);
+            URI imagePath = imageService.uploadToLocal(productId, image);
             return ResponseEntity.created(imagePath).body(JSONUtil.createObj().set("imagePath", imagePath));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getMessage());
